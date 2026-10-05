@@ -19,6 +19,8 @@
 - App ELF SHA-256 from the Milestone 4 build (`pio run -e dev`, 2026-10-04): 905ede5f1dd9d761fd7fc6061dc045eabe925d9202807e1ccd89c2200ce15872 (flash 22.4%).
 - Automatic click-free BLE pairing confirmed (2026-10-04) via a compiled C# WinRT helper (dotnet SDK 10): PAIR-STATUS: Paired with no click; PowerShell's `DeviceInformationCustomPairing` scriptblock handler returns "RejectedByHandler" in this PS 5.1/WinRT environment.
 - Firmware timestamps are derived from build-time `__DATE__`/`__TIME__` + uptime with no RTC, so they drift and reset on reboot (2026-10-04).
+- The firmware was merged to main on 2026-10-05 via PR #1 (`feature/esp32s3-hid-usb-ble`) as squash commit 2b0754c, using a user-authorized admin override past the pre-existing red CI (per the delegating session's brief, 2026-10-05; commit corroborated by the session-start git snapshot).
+- The click-free C# WinRT pairtool is vendored in the repo at `tools/pairtool/` (Program.cs, pair.csproj, README.md) and at `examples/esp32-s3-zero-hid-ble/tools/pairtool/` as of the 2b0754c merge (per the delegating session's brief, 2026-10-05; commit corroborated by the session-start git snapshot).
 
 ## Working assumptions
 
