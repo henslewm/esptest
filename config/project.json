@@ -1,38 +1,54 @@
 {
-  "template_mode": true,
-  "template_version": "1.0.0",
-  "created": "2026-08-29",
-  "project_name": "{{PROJECT_NAME}}",
-  "project_slug": "{{PROJECT_SLUG}}",
-  "objective": "{{OBJECTIVE}}",
-  "problem_statement": "{{PROBLEM_STATEMENT}}",
-  "success_criteria": [],
-  "deliverables": [],
-  "target_date": "",
-  "domain": "other",
-  "jurisdiction_or_version": "",
-  "risk_tier": "medium",
+  "domain_profile": "software-hardware",
+  "project_name": "esp32test",
+  "objective": "To develop firmware on an ESP32S3 Zero Waveshare that attaches as HID keyboard & mouse when plugged into USB and then automatically links as a BLE Keyboard.",
+  "success_criteria": [
+    "No user input needed, BLE keyboard visible in settings and USB Key/mouse visible in device manager, test.txt file created in directory wwith input from both keyboards with date/timestamps typeed out only."
+  ],
+  "out_of_scope": [
+    "Does not capture, read, log, store, or forward host keyboard, mouse, or other input; the device only emits keystrokes it generates",
+    "No WiFi, networking, cloud, or remote-control functionality",
+    "Not a general-purpose or persistent input-automation tool beyond the timestamp demonstration"
+  ],
+  "constraints": [
+    "lowest cost, not worried about security since it's on my own machine"
+  ],
+  "source_locations": [
+    "./"
+  ],
+  "owner": "Winston",
+  "risk_tier": "low",
   "sensitivity": "private",
-  "owner": "",
+  "hardware_in_scope": true,
+  "domain": "software-hardware",
+  "project_slug": "esp32test",
+  "problem_statement": "To develop firmware on an ESP32S3 Zero Waveshare that attaches as HID keyboard & mouse when plugged into USB and then automatically links as a BLE Keyboard.",
+  "deliverables": [
+    "Project-specific analysis or implementation",
+    "Current handoff and state records"
+  ],
   "ai_clients": [
     "chatgpt",
     "codex",
     "claude",
-    "claude-code"
+    "claude-code",
+    "mistral"
   ],
   "connectors": [
     "github",
     "web"
   ],
-  "connector_permissions": {
-    "github": "read-and-project-write",
-    "web": "read"
-  },
-  "source_locations": [],
   "repeatable_workflows": [],
   "output_formats": [
     "markdown"
   ],
-  "constraints": [],
-  "out_of_scope": []
+  "target_date": "",
+  "jurisdiction_or_version": "",
+  "connector_permissions": {
+    "github": "read",
+    "web": "read"
+  },
+  "template_mode": false,
+  "template_version": "1.0.0",
+  "created": "2026-10-04"
 }

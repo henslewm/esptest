@@ -2,66 +2,54 @@
 
 ## Project
 
-- **Name:** Universal AI Project Template
-- **Slug:** universal-ai-project-template
-- **Domain:** (inferred) Multi-model AI project control plane, as a reusable template. Served tracks: software development and serial hardware / hardware-software interfaces. Legal work was archived under `archive/legal/` (owner decision).
-- **Risk tier:** Not set
-- **Sensitivity:** Not set. The repository is public.
-- **Owner:** henslewm
-- **Target date:** Not set
+- **Name:** esp32test
+- **Slug:** esp32test
+- **Domain:** software-hardware
+- **Version:** Not specified
+- **Risk tier:** low
+- **Sensitivity:** private
+- **Owner:** Winston
+- **Target date:** Not fixed
 
 ## Problem statement
 
-All AI models hallucinate, drift and deviate from requests, goals, requirements and specs, so the controls must prevent that (endorsed "1000%"). (inferred) Having the strongest model do all the work costs too much, and one chat's memory does not carry across models or sessions.
+To develop firmware on an ESP32S3 Zero Waveshare that attaches as HID keyboard & mouse when plugged into USB and then automatically links as a BLE Keyboard.
 
 ## Desired outcome
 
-A reusable, repo-backed control plane that makes complex, high-stakes AI-assisted work efficient: the owner is "spending money now to save money later." An architect model (Fable, Opus 5.5/6) must delegate intelligently to cheaper or local models under an explicit contract and monitor them effectively.
+To develop firmware on an ESP32S3 Zero Waveshare that attaches as HID keyboard & mouse when plugged into USB and then automatically links as a BLE Keyboard.
 
-## Definition of done (inferred)
+## Definition of done
 
-- Cheaper cloud or local models execute architect-written packets within the per-packet limits, monitored through the acceptance and feedback ledgers.
-- The software and hardware tracks bootstrap, plan, execute and verify end to end. The template is frozen at this scope (ADR-089); further work only on a new owner request.
+- No user input needed, BLE keyboard visible in settings and USB Key/mouse visible in device manager, test.txt file created in directory wwith input from both keyboards with date/timestamps typeed out only.
 
 ## Required deliverables
 
-- **Continuity:** GitHub as durable memory for ChatGPT, Codex, Claude, Claude Code and Mistral.
-- **Packets:** the strong model writes bounded, machine-checkable packets; cheaper cloud or local models execute them.
-- **Ledgers:** the existing acceptance and feedback ledgers and the Markdown control files. A combined ledger is not pursued (ADR-089).
-- **Domain templates:** the `software-hardware` profile with a `hardware` or `web-ui` track (`instructions/tracks/`). ESP32/PlatformIO is only one example of serial hardware and hardware/software human interfaces.
+- Project-specific analysis or implementation
+- Current handoff and state records
 
 ## Scope
 
 ### In scope
 
-- (inferred) The template: control files, scripts, schemas, ledger designs, fictional examples and model entrypoints.
+- Work necessary to achieve the desired outcome and deliverables.
 
 ### Out of scope
 
-- Legal work: archived under `archive/legal/` and not served by this template (owner decision).
+- Does not capture, read, log, store, or forward host keyboard, mouse, or other input; the device only emits keystrokes it generates.
+- No WiFi, networking, cloud, or remote-control functionality.
+- Not a general-purpose or persistent input-automation tool beyond the timestamp demonstration.
 
-## Constraints
+## Constraints and approval gates
 
-- Preserve authoritative source material and provenance. Keep secrets and restricted material out of Git.
-- Sending requires explicit owner approval. Until a superseding ADR on C is recorded with owner sign-off, the current rules' other explicit-authority gates, including those for deletions and consequential external writes, also apply.
-- Simulations or guesses are never acceptable as verification (owner, stated with the domain-template requirement).
+- lowest cost, not worried about security since it's on my own machine
+
+- Preserve authoritative source material and provenance.
+- Keep secrets and unapproved restricted material out of Git.
+- Require explicit approval for consequential external writes.
 
 ## Decision rights
 
-- The owner (henslewm) owns goals, scope, business choices, and consequential external actions.
+- The user owns goals, scope, business choices, and consequential external actions.
 - AI tools may research, analyze, draft, organize, validate, and make reversible repository changes within granted permissions.
-- Each conflict between an owner requirement and a current rule needs an ADR in `DECISIONS.md` and owner sign-off; until then the current rule applies.
-- Unresolved conflicts, material adverse facts, and high-impact assumptions must be surfaced rather than hidden.
-
-## Decisions (resolved 2026-10-03, ADR-089)
-
-Stated by the owner. Each item below was decided; ADR-089 records them and withdraws the draft ADR-084 to ADR-088.
-
-- **A. Review cap:** at most 4 automated-review rounds per pull request, then answer the findings already received and ask the maintainer. ADR-063 and ADR-074 unchanged.
-- **B. Worker attempts:** preferred default 2, recorded only; the per-packet `retry_budget.max_attempts` stays the enforcement point.
-- **C. Approvals:** current rules stay (`MASTER_INSTRUCTIONS.md`, `.claude/rules/02` and `04`, `AGENTS.md`). Not changed.
-- **D. Single ledger:** not pursued. Question 2 is closed as no combined ledger.
-- **F. Delegation:** not pursued. A human runs any worker (ADR-083 removed the launcher).
-- **G. Savings telemetry and dry runs (#12, #13):** deferred.
-- Filing and sending require explicit owner approval (unchanged).
-- Simulations or guesses are never acceptable as verification (unchanged).
+- Material adverse facts, conflicts, and high-impact assumptions must be surfaced.

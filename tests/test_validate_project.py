@@ -104,6 +104,19 @@ class IssueTemplateGuidanceTests(unittest.TestCase):
         self.assertEqual(text, mirrored.read_text(encoding="utf-8"))
 
 
+def _generated_project() -> bool:
+    """A generated project (template_mode false) deliberately omits the TEMPLATE_ONLY_REQUIRED
+    archives (see scripts/validate_project.py), so these template-mode archive checks do not
+    apply and the validator correctly does not require them."""
+    try:
+        import json
+        config = json.loads((ROOT / "config" / "project.json").read_text(encoding="utf-8"))
+        return not bool(config.get("template_mode", True))
+    except Exception:
+        return False
+
+
+@unittest.skipIf(_generated_project(), "generated project deliberately omits template-only archives")
 class ArchiveHistoryTests(unittest.TestCase):
     """ADR-081: the archives hold the ADR rows and changelog entries moved out of the
     startup files, so a missing or zero-byte archive must fail validation (PR #99)."""
