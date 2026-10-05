@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "domain_profile": "software-hardware",
+  "state": "ACTIVE",
+  "project": {
+    "name": "esp32test",
+    "objective": "To develop firmware on an ESP32S3 Zero Waveshare that attaches as HID keyboard & mouse when plugged into USB and then automatically links as a BLE Keyboard.",
+    "definition_of_done": [
+      "No user input needed, BLE keyboard visible in settings and USB Key/mouse visible in device manager, test.txt file created in directory wwith input from both keyboards with date/timestamps typeed out only."
+    ],
+    "non_goals": [
+      "Does not capture, read, log, store, or forward host keyboard, mouse, or other input; the device only emits keystrokes it generates",
+      "No WiFi, networking, cloud, or remote-control functionality",
+      "Not a general-purpose or persistent input-automation tool beyond the timestamp demonstration"
+    ],
+    "constraints": [
+      "lowest cost, not worried about security since it's on my own machine"
+    ]
+  },
+  "architecture": {
+    "summary": "Single-MCU firmware for a Waveshare ESP32-S3-Zero, built with PlatformIO/Arduino-ESP32 and split into single-responsibility modules indexed by MODULES.md. On USB connection the device enumerates as a composite TinyUSB HID device exposing both a keyboard and a mouse, visible in Windows Device Manager. In parallel it advertises as a BLE HID keyboard that Windows bonds with once and auto-reconnects thereafter, visible in Bluetooth settings. With no steady-state user input, a scheduler/business-logic module emits keystrokes that type date/timestamped lines into a text file on the host over both the USB and BLE keyboard paths, demonstrating each transport. The device only emits keystrokes it generates; it never reads, captures, logs, or forwards host input. Timestamps come from firmware build time plus uptime, the lowest-cost option requiring no network or credentials.",
+    "boundaries": [
+      "Hardware abstraction boundary: a device/HID layer wraps USBHIDKeyboard, USBHIDMouse, and the BLE keyboard behind a keystroke-emitter contract that a host-side fake can satisfy, so business logic is testable without the board.",
+      "USB mode: HID requires TinyUSB (ARDUINO_USB_MODE=0, USB-OTG). The S3-Zero has one USB-C port and no UART bridge, so HID, flashing, and serial monitor share it; the OTG enumeration identity differs from the 303A:1001 CDC default and must be read from the pinned core during execution. BOOT-button recovery applies.",
+      "BLE exposes a single HID input report, keyboard only; the mouse is USB-only. This sidesteps the core-3.3.12 NimBLE duplicate-UUID report bug recorded in docs/BLE_NOTES.md.",
+      "Transports in scope are USB HID and BLE HID only; no WiFi, networking, or cloud.",
+      "Host file creation targets a device-driven keystroke macro (launch Notepad, type, save test.txt) to satisfy no-user-input; a pre-opened editor is the documented fallback if the macro proves unreliable.",
+      "Changing USB mode, protocol/report maps, hardware support scope, the HID abstraction boundary, persistence, or the core/framework requires renewed approval."
+    ],
+    "milestones": [
+      "Baseline and hardware identification",
+      "USB HID composite keyboard and mouse",
+      "BLE keyboard link and pairing",
+      "Timestamp and test.txt typing workflow",
+      "Hardware-in-loop verification"
+    ],
+    "dependencies": [
+      "Baseline and hardware identification -> USB HID composite keyboard and mouse",
+      "Baseline and hardware identification -> BLE keyboard link and pairing",
+      "USB HID composite keyboard and mouse -> Timestamp and test.txt typing workflow",
+      "BLE keyboard link and pairing -> Timestamp and test.txt typing workflow",
+      "Timestamp and test.txt typing workflow -> Hardware-in-loop verification"
+    ]
+  },
+  "sources": [
+    "./"
+  ],
+  "risks": [
+    "Compile or simulation success may diverge from physical hardware; VERIFIED_ON_HARDWARE is earned only by operator attestation, never authored.",
+    "USB-OTG/HID mode changes the enumeration identity and shares the single USB-C port with flashing and monitoring, risking lockout; mitigated by BOOT-button recovery and reading the OTG VID:PID from the pinned core.",
+    "BLE HID on Windows needs finicky one-time pairing (docs/BLE_NOTES.md); mitigated by scoping BLE to one keyboard report and accepting one-time operator pairing.",
+    "The device-driven Notepad macro is timing- and focus-sensitive; mitigated by a pre-opened-editor fallback.",
+    "Build-time-plus-uptime timestamps drift and reset on reboot; accepted under the lowest-cost constraint.",
+    "Arduino-ESP32 core 3.x NimBLE can silently drop a duplicate-UUID HID report; mitigated by a keyboard-only BLE report map."
+  ],
+  "routing": {
+    "policy": "Assign the cheapest capability tier expected to satisfy each packet's acceptance criteria; codecs, scheduler logic, fakes, and host-side tests route to local tiers first, while the USB/BLE hardware adapter and integration packets carry high risk per DOMAIN_PROFILE.md and add model and cross-family review. Escalate only on objective failure or risk, never preference."
+  },
+  "workflow": {
+    "policy": "One bounded issue per packet in a dependency-ordered wave plan; each PR links its packet and carries validation evidence; an automated Codex or CodeRabbit review matching the head commit (ADR-074) precedes any merge; accept only inside the approved foundation. GitHub stays read-only: pushing branches, opening issues/PRs, and merging are reserved human actions pending explicit authorization."
+  },
+  "human_gates": [
+    "Material architecture change (USB mode, protocol/report maps, hardware scope, HID abstraction boundary, persistence, or framework)",
+    "Physical-hardware actions that risk damaging the board (driving GPIO, power, or peripherals outside spec)",
+    "Any claim of hardware verification: VERIFIED_ON_HARDWARE is earned by operator attestation of observed behavior, never authored by the agent",
+    "GitHub writes: push, open issue or PR, merge",
+    "One-time Windows BLE pairing of the device",
+    "Consequential external action"
+  ],
+  "domain": {
+    "baseline": "No firmware exists yet; the repository holds control-plane and template files only, with no src/ or platformio.ini. This is a greenfield firmware build.",
+    "hardware_identity": "Waveshare ESP32-S3-Zero: ESP32-S3 SoC, single USB-C port, no onboard UART bridge, onboard WS2812 RGB LED. Exact chip variant, flash size, and PSRAM are datasheet-derived pending confirmation via esptool flash-id; Waveshare lists ESP32-S3FH4R2 with 4MB flash and 2MB in-package PSRAM.",
+    "interfaces": "USB as a TinyUSB HID composite (keyboard plus mouse) and BLE as an HID keyboard. No WiFi or other networking.",
+    "specifications": "USB HID class spec and HID Usage Tables; Espressif ESP32-S3 technical reference and TinyUSB; Arduino-ESP32 USB and BLE APIs; Waveshare ESP32-S3-Zero wiki. Tracked in SOURCE_INDEX.md and not all yet verified.",
+    "environment": "Windows 11 with PowerShell 7.6; PlatformIO CLI and Python 3.12 installed; the host is both the HID/BLE target and the Device Manager and Bluetooth-settings verifier.",
+    "known_paths": "Known-good: host-side unit, contract, and simulation rungs run without the board via a keystroke-emitter fake, the scheduler, and the timestamp formatter. Known-failing: none observed yet, because no firmware has been built or run on hardware.",
+    "validation_resources": "Hardware-in-loop: the ESP32-S3-Zero connected over USB-C to the Windows host, with the operator observing Device Manager, Bluetooth settings, and the typed test.txt. Host-side fakes and loopback cover the first five ladder rungs.",
+    "physical_access": "The project owner (operator) has physical access to plug in the board and press BOOT; autonomous workers do not. Hardware runs are operator actions.",
+    "architecture_boundaries": "Changes to USB mode or HID composite layout, the BLE report map, the hardware abstraction boundary, transport scope such as adding WiFi, the persistence approach, or the Arduino-ESP32 core/framework require renewed approval."
+  },
+  "unresolved": [],
+  "configuration": {
+    "domain_profile": "software-hardware",
+    "project_name": "esp32test",
+    "objective": "To develop firmware on an ESP32S3 Zero Waveshare that attaches as HID keyboard & mouse when plugged into USB and then automatically links as a BLE Keyboard.",
+    "success_criteria": [
+      "No user input needed, BLE keyboard visible in settings and USB Key/mouse visible in device manager, test.txt file created in directory wwith input from both keyboards with date/timestamps typeed out only."
+    ],
+    "out_of_scope": [
+      "Does not capture, read, log, store, or forward host keyboard, mouse, or other input; the device only emits keystrokes it generates",
+      "No WiFi, networking, cloud, or remote-control functionality",
+      "Not a general-purpose or persistent input-automation tool beyond the timestamp demonstration"
+    ],
+    "constraints": [
+      "lowest cost, not worried about security since it's on my own machine"
+    ],
+    "source_locations": [
+      "./"
+    ],
+    "owner": "Winston",
+    "risk_tier": "low",
+    "sensitivity": "private",
+    "hardware_in_scope": true,
+    "domain": "software-hardware",
+    "project_slug": "esp32test",
+    "problem_statement": "To develop firmware on an ESP32S3 Zero Waveshare that attaches as HID keyboard & mouse when plugged into USB and then automatically links as a BLE Keyboard.",
+    "deliverables": [
+      "Project-specific analysis or implementation",
+      "Current handoff and state records"
+    ],
+    "ai_clients": [
+      "chatgpt",
+      "codex",
+      "claude",
+      "claude-code",
+      "mistral"
+    ],
+    "connectors": [
+      "github",
+      "web"
+    ],
+    "repeatable_workflows": [],
+    "output_formats": [
+      "markdown"
+    ],
+    "target_date": "",
+    "jurisdiction_or_version": "",
+    "connector_permissions": {
+      "github": "read",
+      "web": "read"
+    },
+    "template_mode": false,
+    "template_version": "1.0.0",
+    "created": "2026-10-04"
+  },
+  "documents": {
+    "PROJECT_CHARTER.md": "78742af77bd7fc449d2d97593d501dd09c0fe7aff3d929770135adef71fb67a6",
+    "CONNECTOR_PLAN.md": "8d8fbd6a863c988f1d4c94ef32bf999a793171f964c86669365b56c03f2b8a5d",
+    "SKILL_PLAN.md": "322e9e54e2ee1850ca77aee547e1616c3bea7437f3b3928446dbdbee74164fe6",
+    "DOMAIN_PROFILE.md": "91d42727ef1a1b26894f5c3e9f6938c01ac8e372544079da97b7140665875e65"
+  },
+  "approval": {
+    "approved": true,
+    "approved_by": "Winston",
+    "approved_at": "2026-10-05T01:56:03.858047+00:00",
+    "architecture_fingerprint": "e702f64de79f8c542af1b1f9920443080e3a4aac8a6eb3baa4325dad30112843"
+  }
+}

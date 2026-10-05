@@ -2,6 +2,7 @@
 @MASTER_CLAUDE_CODE.md
 @PROJECT_CHARTER.md
 @HANDOFF_CURRENT.md
+@instructions/tracks/hardware.md
 
 # Claude Code Startup Router
 
