@@ -50,6 +50,13 @@ def main():
     if not ports_before:
         print("[flash] No 303A:1001 device present. Plug in the board.")
         return 2
+    if len(ports_before) > 1:
+        names = ", ".join(p.device for p in ports_before)
+        print("[flash] Multiple 303A:1001 devices found (%s)." % names)
+        print("[flash] Refusing an ambiguous target: the 1200-touch and the hwgrep upload could")
+        print("[flash] hit the wrong board. Disconnect the others (or flash with an explicit")
+        print("[flash] upload_port) and retry.")
+        return 2
 
     app_port = ports_before[0].device
     touch_1200(app_port)

@@ -15,9 +15,9 @@
 enum FlowState { FLOW_WAIT, FLOW_RUN, FLOW_DONE };
 static FlowState flow = FLOW_WAIT;
 
-static const uint32_t BLE_SETTLE_MS = 6000;     // let USB mount + BLE link settle first
-static const uint32_t BLE_FALLBACK_MS = 120000; // if BLE never links, proceed USB-only (allows time to re-pair)
-// EDIT THIS to an absolute Windows path on your PC (the device types it literally):
+static const uint32_t BLE_LINK_SETTLE_MS = 3000; // require BLE stably connected this long before running
+static const uint32_t BLE_FALLBACK_MS = 120000;  // if BLE never links, proceed USB-only (allows time to re-pair)
+static uint32_t bleConnectedSince = 0;           // millis() when the current BLE link came up (0 = down)
 static const char* SAVE_PATH = "C:\\Users\\YOURNAME\\test.txt";
 
 static void runTestFileWorkflow(bool withBle) {
@@ -74,10 +74,19 @@ void setup() {
 }
 
 void loop() {
+  // Track how long the BLE link has been stably up, measured from the connect event,
+  // so a late auto-reconnect gets the same settle window as a boot-time link.
+  bool bleNow = bleKeyboardConnected();
+  if (bleNow && bleConnectedSince == 0) {
+    bleConnectedSince = millis();
+  } else if (!bleNow) {
+    bleConnectedSince = 0;
+  }
+
   if (flow == FLOW_WAIT) {
-    bool bleReady = bleKeyboardConnected() && millis() >= BLE_SETTLE_MS;
+    bool bleSettled = bleNow && (millis() - bleConnectedSince >= BLE_LINK_SETTLE_MS);
     bool fallback = millis() >= BLE_FALLBACK_MS;
-    if (bleReady || fallback) {
+    if (bleSettled || fallback) {
       flow = FLOW_RUN;
     }
   }
