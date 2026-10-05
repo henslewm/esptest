@@ -83,7 +83,10 @@ def main():
 
     print(f"[flash] uploading via {dl_port}")
     time.sleep(0.6)  # let Windows settle the new port
-    rc = subprocess.call(["pio", "run", "-e", ENV, "-t", "upload"], shell=True)
+    # Pin the upload to the specific port we found, overriding the broad hwgrep in
+    # platformio.ini, so a second 303A:1001 device can't receive the firmware.
+    rc = subprocess.call(
+        ["pio", "run", "-e", ENV, "-t", "upload", "--upload-port", dl_port], shell=True)
     if rc != 0:
         print("[flash] upload failed. If it says 'no serial data', enter the bootloader manually and re-run.")
     return rc

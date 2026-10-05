@@ -85,7 +85,9 @@ void loop() {
 
   if (flow == FLOW_WAIT) {
     bool bleSettled = bleNow && (millis() - bleConnectedSince >= BLE_LINK_SETTLE_MS);
-    bool fallback = millis() >= BLE_FALLBACK_MS;
+    // The USB-only fallback applies only while BLE is down; a connected link always gets
+    // its full settle window, even if it comes up just before the deadline.
+    bool fallback = !bleNow && millis() >= BLE_FALLBACK_MS;
     if (bleSettled || fallback) {
       flow = FLOW_RUN;
     }
