@@ -23,6 +23,18 @@ from bootstrap_project import track_for
 FIXTURES = {"software-hardware": "config/bootstrap.example.json"}
 
 
+def _generated_project() -> bool:
+    """These template-generation self-tests resolve the template root to the repo root
+    (bootstrap_project.py:locate_template_root). A generated project (template_mode false)
+    carries its own `@instructions/tracks/...` import, so regenerating from it duplicates the
+    track line. The checks apply to the universal template, not to a generated project."""
+    try:
+        config = json.loads((ROOT / "config" / "project.json").read_text(encoding="utf-8"))
+        return not bool(config.get("template_mode", True))
+    except Exception:
+        return False
+
+
 def read(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -76,6 +88,7 @@ class BootstrapIntegrationTests(unittest.TestCase):
                      stdin=f"Synthetic test user\nAPPROVE {fingerprint}\n")
         self.active_check(root, True)
 
+    @unittest.skipIf(_generated_project(), "template-generation self-test; not applicable to a generated project")
     def test_no_hardware_selects_the_web_ui_track_and_fills_the_hardware_intake(self):
         data = answers("software-hardware")
         data["hardware_in_scope"] = False
@@ -96,6 +109,7 @@ class BootstrapIntegrationTests(unittest.TestCase):
         self.run_cli(ROOT / "scripts/bootstrap_project.py", "--answers", self.base / "bad-flag.json",
                      "--destination", dest, "--no-git", ok=False)
 
+    @unittest.skipIf(_generated_project(), "template-generation self-test; not applicable to a generated project")
     def test_all_profiles_through_root_native_and_standalone_entrypoints(self):
         standalone = self.base / "installed-skill"
         shutil.copytree(ROOT / "skills/complex-project-bootstrapper", standalone, ignore=shutil.ignore_patterns("__pycache__"))
